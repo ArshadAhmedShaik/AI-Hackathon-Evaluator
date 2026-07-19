@@ -48,7 +48,10 @@ export async function POST(req) {
   } catch (err) {
     console.error("Evaluation pipeline failed:", err);
     return Response.json(
-      { error: err.message || "Evaluation failed. Please try again." },
+      { 
+        error: err.message || String(err) || "Evaluation failed. Please try again.",
+        stack: err.stack || null
+      },
       { status: 500 }
     );
   }
