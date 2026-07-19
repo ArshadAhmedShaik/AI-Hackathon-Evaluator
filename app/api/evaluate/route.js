@@ -18,11 +18,11 @@ export async function POST(req) {
       );
     }
 
-    // Agent 1: Intake — turn raw text into structured data
-    const intake = await callAgent(INTAKE_PROMPT, text);
-
-    // Real, verifiable data — not the LLM guessing
-    const repoStats = await fetchRepoStats(repoUrl);
+    // Agent 1 & GitHub fetch in parallel
+    const [intake, repoStats] = await Promise.all([
+      callAgent(INTAKE_PROMPT, text),
+      fetchRepoStats(repoUrl),
+    ]);
 
     // Agent 2: Depth check — fed the real repo data
     const depth = await callAgent(
@@ -46,7 +46,7 @@ export async function POST(req) {
   } catch (err) {
     console.error("Evaluation pipeline failed:", err);
     return Response.json(
-      { error: "Evaluation failed. Please try again." },
+      { error: err.message || "Evaluation failed. Please try again." },
       { status: 500 }
     );
   }
